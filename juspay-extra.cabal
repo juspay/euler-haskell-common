@@ -1,0 +1,108 @@
+cabal-version: 3.0
+name:          juspay-extra
+version:       1.0.1.5
+synopsis:      Juspay extra stuff
+description:
+homepage:      https://bitbucket.org/juspay/euler-extra
+license:
+author:        Juspay Technologies Pvt Ltd
+maintainer:    ilia.rodionov@juspay.in
+copyright:     (C) Juspay Technologies Pvt Ltd 2021
+category:      Euler
+build-type:    Simple
+tested-with:   GHC ==8.8.4
+             , GHC ==8.10.7
+
+source-repository head
+  type:     git
+  location: https://bitbucket.org/juspay/juspay-extra
+
+common common-lang
+  ghc-options:
+    -Wall -Wcompat -Wincomplete-record-updates
+    -Wincomplete-uni-patterns -Wredundant-constraints -Werror
+    -fplugin=RecordDotPreprocessor
+
+  build-depends:
+    , base                     >=4.13   && <5
+    , record-dot-preprocessor  ^>=0.2.14
+    , record-hasfield
+
+  default-extensions:
+    DataKinds
+    DeriveFunctor
+    DeriveGeneric
+    DuplicateRecordFields
+    EmptyCase
+    FlexibleContexts
+    FlexibleInstances
+    GeneralizedNewtypeDeriving
+    InstanceSigs
+    LambdaCase
+    MultiParamTypeClasses
+    OverloadedLabels
+    OverloadedStrings
+    TupleSections
+    TypeApplications
+    TypeFamilies
+    TypeSynonymInstances
+    UndecidableInstances
+
+  default-language:   Haskell2010
+
+library
+  import:          common-lang
+  exposed-modules:
+    Juspay.Extra.Config
+    Juspay.Extra.Control
+    Juspay.Extra.Json
+    Juspay.Extra.NonEmptyText
+    Juspay.Extra.Parsing
+    Juspay.Extra.Secret
+    Juspay.Extra.Text
+    Juspay.Extra.Time
+
+  build-depends:
+    , aeson
+    , bytestring
+    , containers
+    , deepseq
+    , either
+    , extra
+    , fin
+    , http-api-data
+    , http-media
+    , nonempty-containers
+    , nonempty-vector
+    , optics-core
+    , QuickCheck
+    , reflection
+    , servant                    ^>= 0.18.3
+    , store
+    , string-conversions
+    , text
+    , text-format
+    , time
+    , transformers
+    , tree-diff
+    , unordered-containers
+    , validation-selective
+    , vector
+
+  hs-source-dirs:  src
+
+common common-test
+  import:        common-lang
+  ghc-options:   -threaded -with-rtsopts=-N
+  build-depends:
+      juspay-extra
+    , hedgehog
+    , hspec
+    , hspec-hedgehog
+
+test-suite parsing
+  import:         common-test
+  type:           exitcode-stdio-1.0
+  main-is:        Main.hs
+  build-depends:  nonempty-vector
+  hs-source-dirs: test/parsing

@@ -1,0 +1,9 @@
+
+resolver: lts-18.7
+
+
+packages:
+- .
+
+extra-deps:
+- record-dot-preprocessor-0.2.14

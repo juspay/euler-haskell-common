@@ -1,0 +1,19 @@
+name: juspay-extra
+
+allowed-paths:
+  - src
+  - juspay-extra.cabal
+
+disable-tests: true
+
+dependencies:
+  euler-build:
+    branch: master
+    revision: c6af205a7adb1b7abac18f06830f4ed196bfd6e4
+
+# overrides:
+
+# build-tools:
+
+nix-shell-tools:
+  - haskell-language-server

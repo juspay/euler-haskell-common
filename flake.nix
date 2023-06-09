@@ -2,7 +2,8 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     flake-parts.url = "github:hercules-ci/flake-parts";
-    haskell-flake.url = "github:srid/haskell-flake/0.3.0";
+    # haskell-flake 0.4.0 unreleased, points to latest master commit at the time
+    haskell-flake.url = "github:srid/haskell-flake/908a59167f78035a123ab71ed77af79bed519771";
   };
   outputs = inputs@{ self, nixpkgs, flake-parts, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } ({ withSystem, ... }: {
@@ -13,11 +14,11 @@
       perSystem = { self', pkgs, lib, config, ... }: {
         packages.default = self'.packages.juspay-extra;
         haskellProjects.default = {
-          overrides = self: super:
-            with pkgs.haskell.lib.compose;
-            lib.mapAttrs (k: v: lib.pipe super.${k} v) {
-              juspay-extra = [ doJailbreak ];
+          settings = {
+            juspay-extra = {
+              jailbreak = true;
             };
+          };
         };
       };
     });

@@ -25,7 +25,7 @@ common common-lang
 
   build-depends:
     , base                     >=4.13   && <5
-    , record-dot-preprocessor  ^>=0.2.14
+    , record-dot-preprocessor
     , record-hasfield
 
   default-extensions:
@@ -77,7 +77,7 @@ library
     , optics-core
     , QuickCheck
     , reflection
-    , servant                    ^>= 0.18.3
+    , servant
     , store
     , string-conversions
     , text

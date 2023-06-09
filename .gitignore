@@ -40,3 +40,4 @@ result
 result-*
 tags
 stack.yaml.lock
+.direnv/

@@ -36,27 +36,88 @@ import Data.Either.Extra ( maybeToEither )
 import Data.Either.Combinators (whenLeft)
 
 -- | Like except but maps an error.
+
+-- | Like except but maps an error.
+-- Map a function over the error type of an 'Either' within the context of 'ExceptT'.
+--
+-- Given a function f :: e -> e' and an 'Either' value, it lifts the function to
+-- operate on the error type within the 'ExceptT' monad transformer.
+--
+-- The resulting 'ExceptT' computation has the same behavior as the original
+-- 'ExceptT', but with the error type transformed using the provided function.
+--
+-- Example:
+-- @
+--   let result = exceptMap (\err -> show err) (Left "Error")
+--   -- result :: ExceptT String m a
+-- @
 exceptMap :: forall a e e' m . Monad m => (e -> e') -> Either e a -> ExceptT e' m a
 exceptMap f = withExceptT f . except
 
--- | Like except, but for @Maybe a@, constructs a computation in the exception monad
--- taking a value for a left value
+-- | Lifts a 'Maybe' value into an 'ExceptT' computation with a specified error value.
+--
+-- Given an error value 'e' and a 'Maybe' value, it converts the 'Maybe' into
+-- an 'Either' with the provided error value. Then, it wraps the 'Either' in the
+-- 'ExceptT' monad transformer.
+--
+-- The resulting 'ExceptT' computation behaves similarly to the original 'Maybe',
+-- but with the added capability of handling a specific error in the 'ExceptT'.
+--
+-- Example:
+-- >>> let result = exceptMaybe "Error" (Just 42)
+-- >>> -- result :: ExceptT String m Int
 exceptMaybe :: forall a e m . Monad m => e -> Maybe a -> ExceptT e m a
 exceptMaybe e = except . maybeToEither e
 
 -- | Constructs a computation from @Maybe a@ inside a monad @m@.
+-- Lifts a monadic 'Maybe' value into an 'ExceptT' computation with a specified error value.
+--
+-- Given an error value 'e' and a monadic 'Maybe' value, it converts the 'Maybe'
+-- into an 'Either' with the provided error value within the underlying monad.
+-- Then, it wraps the 'Either' in the 'ExceptT' monad transformer.
+--
+-- The resulting 'ExceptT' computation behaves similarly to the original monadic 'Maybe',
+-- but with the added capability of handling a specific error in the 'ExceptT'.
+--
+-- Example:
+-- >>> let result = exceptMaybeM "Error" (return (Just 42))
+-- >>> -- result :: ExceptT String m Int
 exceptMaybeM :: forall a e m . Monad m => e -> m (Maybe a) -> ExceptT e m a
 exceptMaybeM e = ExceptT . fmap (maybeToEither e)
 
 -- | Runs an action when condition is met; otherwise just pass an input
 -- to the next action.
+-- Conditionally applies a function to a value based on a Boolean condition.
+--
+-- Given a Boolean condition, a function 'f' of type (a -> m a) is applied to
+-- a value of type 'a' if the condition is 'True'. If the condition is 'False',
+-- the original value is lifted into the applicative context without modification.
+--
+-- The resulting computation is of type (a -> m a), where 'm' is an applicative functor.
+--
+-- Example:
+-- >>> let result = when' True (\x -> Just (x + 1)) 3
+-- >>> -- result :: Maybe Int
 when' :: forall a m . Applicative m => Bool -> (a -> m a) -> (a -> m a)
 when' True f = f
 when' False _ = pure
+
 -- TODO can we implement it using ifM?
 -- when' cond trueAct = ifM (pure cond) trueAct pure
 
 -- | The opposite of 'when''
+-- Conditionally applies a function to a value based on the negation of a Boolean condition.
+--
+-- This function is a composition of 'when'', where the condition is the negation of
+-- the provided Boolean argument. It applies a function 'f' of type (a -> m a) to
+-- a value of type 'a' if the condition is 'False'. If the condition is 'True',
+-- the original value is lifted into the applicative context without modification.
+--
+-- The resulting computation is of type (a -> m a), where 'm' is an applicative functor.
+--
+-- Example:
+-- >>> let result = unless' True (\x -> Just (x + 1)) 3
+-- >>> -- result :: Maybe Int
 unless' :: forall a m . Applicative m => Bool -> (a -> m a) -> (a -> m a)
 unless' = when' . not
 

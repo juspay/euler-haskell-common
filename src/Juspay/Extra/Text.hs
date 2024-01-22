@@ -155,7 +155,19 @@ emptyTextAsNothing Nothing   = Nothing
 emptyTextAsNothing (Just "") = Nothing
 emptyTextAsNothing x         = x
 
--- | Make request body from query parametors
+-- | Encode a list of key-value pairs as a URL-encoded 'ByteString' for use in a request body.
+-- Make request body from query parametors
+--
+-- This function takes a list of key-value pairs and encodes them into a URL-encoded 'ByteString'
+-- suitable for use as a request body in HTTP requests. The encoding follows the standard form
+-- of key-value pairs separated by '&' and each pair consisting of key and value separated by '='.
+--
+-- The encoding of each key and value follows URL encoding rules, where reserved characters are percent-encoded.
+--
+-- Example:
+-- >>> let params = [("name", "John Doe"), ("age", "30")]
+-- >>> formUrlEncode params
+-- >>> -- "name=John%20Doe&age=30"
 formUrlEncode :: [(Text, Text)] -> BL.ByteString
 formUrlEncode = Builder.toLazyByteString . mconcat . intersperse amp . map encodePair
   where
@@ -164,21 +176,26 @@ formUrlEncode = Builder.toLazyByteString . mconcat . intersperse amp . map encod
     percent = Builder.word8 (ord '%')
     plus = Builder.word8 (ord '+')
 
+    -- Encode a key-value pair
     encodePair :: (Text, Text) -> Builder
     encodePair (key, value) = encode key <> equals <> encode value
 
+    -- Encode a Text value
     encode :: Text -> Builder
     encode = escape . TE.encodeUtf8
 
+    -- URL-encode a ByteString
     escape :: B.ByteString -> Builder
     escape = mconcat . map f . B.unpack
       where
+        -- Encode each character individually
         f :: Word8 -> Builder
         f c
           | p c = Builder.word8 c
           | c == ord ' ' = plus
           | otherwise = percentEncode c
 
+        -- Predicate for characters that do not need encoding
         p :: Word8 -> Bool
         p c =
              ord 'a' <= c && c <= ord 'z'
@@ -189,14 +206,17 @@ formUrlEncode = Builder.toLazyByteString . mconcat . intersperse amp . map encod
           || ord '0' <= c && c <= ord '9'
           || ord 'A' <= c && c <= ord 'Z'
 
+    -- Convert a Char to Word8
     ord :: Char -> Word8
     ord = fromIntegral . C.ord
 
+    -- Percent-encode a Word8
     percentEncode :: Word8 -> Builder
     percentEncode n = percent <> hex hi <> hex lo
       where
         (hi, lo) = n `divMod` 16
 
+    -- Convert a hex value to Word8
     hex :: Word8 -> Builder
     hex n = Builder.word8 (offset + n)
       where

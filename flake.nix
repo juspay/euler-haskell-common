@@ -1,25 +1,39 @@
 {
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
-    flake-parts.url = "github:hercules-ci/flake-parts";
-    # haskell-flake 0.4.0 unreleased, points to latest master commit at the time
-    haskell-flake.url = "github:srid/haskell-flake/908a59167f78035a123ab71ed77af79bed519771";
+    common.url = "github:juspay/nix-common/98c6ae8b431b1008fc41ff20fc1cb64037e4ef5b";
   };
-  outputs = inputs@{ self, nixpkgs, flake-parts, ... }:
-    flake-parts.lib.mkFlake { inherit inputs; } ({ withSystem, ... }: {
-      systems = nixpkgs.lib.systems.flakeExposed;
-      imports = [
-        inputs.haskell-flake.flakeModule
-      ];
-      perSystem = { self', pkgs, lib, config, ... }: {
-        packages.default = self'.packages.juspay-extra;
-        haskellProjects.default = {
-          settings = {
-            juspay-extra = {
-              jailbreak = true;
-            };
+
+  outputs = inputs:
+    inputs.common.lib.mkFlake { inherit inputs; } {
+      perSystem = { self', pkgs, pkgs-latest, config, system, filter, ... }: {
+
+        haskellProjects.default = let fs = pkgs-latest.lib.fileset; in {
+
+          projectRoot = builtins.toString (fs.toSource {
+            root = ./.;
+            fileset = fs.unions [
+              ./src
+              ./test
+              ./benchmark
+              ./juspay-extra.cabal
+            ];
+          });
+
+          autoWire = [ "packages" ];
+          packages = {
+            # Dependencies
           };
         };
+
+        packages.default = self'.packages.juspay-extra;
+
+        devShells.default = pkgs.mkShell {
+          name = "euler-haskell-common-devshell";
+          inputsFrom = [
+            config.haskellProjects.default.outputs.devShell
+            config.devShells.common
+          ];
+        };
       };
-    });
+    };
 }

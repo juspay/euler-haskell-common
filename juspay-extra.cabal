@@ -1,9 +1,9 @@
 cabal-version: 3.0
 name:          juspay-extra
-version:       1.0.1.5
+version:       1.2.1.1
 synopsis:      Juspay extra stuff
 description:
-homepage:      https://bitbucket.org/juspay/euler-extra
+homepage:      https://github.com/juspay/euler-haskell-common
 license:
 author:        Juspay Technologies Pvt Ltd
 maintainer:    ilia.rodionov@juspay.in
@@ -15,7 +15,7 @@ tested-with:   GHC ==8.8.4
 
 source-repository head
   type:     git
-  location: https://bitbucket.org/juspay/juspay-extra
+  location: https://github.com/juspay/euler-haskell-common
 
 common common-lang
   ghc-options:
@@ -24,8 +24,9 @@ common common-lang
     -fplugin=RecordDotPreprocessor
 
   build-depends:
-    , base                     >=4.13   && <5
-    , record-dot-preprocessor
+    , base                     
+    , record-dot-preprocessor 
+    , exceptions
     , record-hasfield
 
   default-extensions:
@@ -55,19 +56,25 @@ library
   exposed-modules:
     Juspay.Extra.Config
     Juspay.Extra.Control
+    Juspay.Extra.Env
     Juspay.Extra.Json
+    Juspay.Extra.List
     Juspay.Extra.NonEmptyText
     Juspay.Extra.Parsing
     Juspay.Extra.Secret
     Juspay.Extra.Text
     Juspay.Extra.Time
+    Juspay.Extra.EnvConfig
+    Juspay.Extra.AES
 
   build-depends:
     , aeson
     , bytestring
     , containers
+    , criterion
     , deepseq
     , either
+    , exceptions
     , extra
     , fin
     , http-api-data
@@ -76,8 +83,9 @@ library
     , nonempty-vector
     , optics-core
     , QuickCheck
+    , random
     , reflection
-    , servant
+    , servant                    
     , store
     , string-conversions
     , text
@@ -88,6 +96,9 @@ library
     , unordered-containers
     , validation-selective
     , vector
+    , mtl
+    , cryptonite
+    , base64-bytestring
 
   hs-source-dirs:  src
 
@@ -99,6 +110,16 @@ common common-test
     , hedgehog
     , hspec
     , hspec-hedgehog
+    , aeson
+    , text
+    , unordered-containers
+    , time
+    , vector
+    , async
+    , bytestring
+    , universum
+    , cryptonite
+    , base64-bytestring
 
 test-suite parsing
   import:         common-test
@@ -106,3 +127,22 @@ test-suite parsing
   main-is:        Main.hs
   build-depends:  nonempty-vector
   hs-source-dirs: test/parsing
+
+test-suite env-test
+  import:         common-test
+  type:           exitcode-stdio-1.0
+  main-is:        Main.hs
+  build-depends:  nonempty-vector
+  hs-source-dirs: test/env
+
+benchmark common-bench
+  import: common-lang
+  type: exitcode-stdio-1.0
+  main-is: Bench.hs
+  hs-source-dirs:
+      benchmark
+  build-depends:
+        criterion
+        , juspay-extra
+        , random
+  default-language: Haskell2010

@@ -18,6 +18,7 @@
 {-# OPTIONS_GHC -Wno-unused-foralls #-}
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE DerivingVia         #-}
+{-# LANGUAGE DeriveAnyClass      #-}
 {-# LANGUAGE KindSignatures      #-}
 {-# LANGUAGE PatternSynonyms     #-}
 {-# LANGUAGE RecordWildCards     #-}
@@ -102,6 +103,8 @@ import           Prelude hiding ((.), length)
 import           Text.Read (readMaybe)
 import           Type.Reflection (Typeable, tyConName, typeRep, typeRepTyCon)
 import           Validation (Validation (Failure, Success), validationToEither)
+import           Data.Aeson (ToJSON, FromJSON)
+import           GHC.Generics
 
 
 -- | Describes what kind of error we ran into when parsing a particular value.
@@ -124,7 +127,8 @@ data ParsingErrorType =
   Other {
     message :: {-# UNPACK #-} !Text
     }
-  deriving stock (Eq, Show)
+  deriving stock (Eq, Show, Generic)
+  deriving (ToJSON, FromJSON)
 
 -- | Describes the error in full. In particular, when parsing a record field, this
 -- tracks the field and record we tried parsing from.
@@ -135,7 +139,8 @@ data ParsingError =
     errorType  :: !ParsingErrorType
     } |
   OtherParsingError !ParsingErrorType
-  deriving stock (Eq, Show)
+  deriving stock (Eq, Show, Generic)
+  deriving (ToJSON, FromJSON)
 
 -- | Represents either (possibly many) errors, or a successful result.
 --

@@ -76,7 +76,22 @@ nonEmpty = prism' toText (\t -> Text.uncons t $> NET t)
 new :: Char -> Text -> NonEmptyText
 new c = NET . Text.cons c
 
--- | Create prism for newtypes over NonEmptyText
+-- | A 'Prism' for converting between 'Text' and a newtype 'a' coercible to 'NonEmptyText'.
+--
+-- This 'Prism' is designed for use with newtypes that are coercible to 'NonEmptyText'.
+-- It allows you to view and modify 'Text' values as values of the newtype 'a', and vice versa.
+--
+-- A prism is an optic that focuses on part of a larger structure. In the case of 'newtypeNetPrism',
+-- it focuses on the presence or absence of characters in the 'Text', converting it to the newtype 'a'
+-- if it is non-empty, and back to 'Text' otherwise. The 'newtypeNetPrism' prism is a partial isomorphism,
+-- meaning it may fail in the direction from 'Text' to 'a' if the input 'Text' is empty.
+--
+-- Example:
+-- >>> preview newtypeNetPrism "Hello" :: Maybe MyNewtype
+-- >>> -- Just (MyNewtype (NET "Hello"))
+--
+-- >>> review newtypeNetPrism (MyNewtype (NET "World"))
+-- >>> -- "World"
 newtypeNetPrism :: forall a . (Coercible a NonEmptyText) => Prism' Text a
 newtypeNetPrism = prism' out into
   where

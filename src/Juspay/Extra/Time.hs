@@ -20,9 +20,11 @@ import           Data.Time (LocalTime,
                             UTCTime, localTimeToUTC, utc,
                             utcToLocalTime)
 
+-- | Takes a 'Maybe' 'UTCTime' and returns a 'Maybe' 'LocalTime' by applying 'utcToLocalTime' function from the 'time' library using 'fmap'.
 readToLocalTime :: Maybe UTCTime -> Maybe LocalTime
 readToLocalTime = fmap (utcToLocalTime utc)
 
+-- | Converts a given 'LocalTime' to its corresponding 'UTCTime' representation.
 convertLocalToUTC :: LocalTime -> UTCTime
 convertLocalToUTC = localTimeToUTC utc
 

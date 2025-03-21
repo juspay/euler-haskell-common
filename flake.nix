@@ -1,6 +1,6 @@
 {
   inputs = {
-    common.url = "github:juspay/nix-common/98c6ae8b431b1008fc41ff20fc1cb64037e4ef5b";
+    common.url = "github:juspay/nix-common";
   };
 
   outputs = inputs:
